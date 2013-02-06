@@ -2,10 +2,8 @@
 
 Given /the following movies exist/ do |movies_table|
   movies_table.hashes.each do |movie|
-    # each returned element will be a hash whose key is the table header.
-    # you should arrange to add that movie to the database here.
+    Movie.create!(movie)
   end
-  flunk "Unimplemented"
 end
 
 # Make sure that one string (regexp) occurs before or after another one
@@ -22,7 +20,34 @@ end
 #  "When I check the following ratings: G"
 
 When /I (un)?check the following ratings: (.*)/ do |uncheck, rating_list|
-  # HINT: use String#split to split up the rating_list, then
-  #   iterate over the ratings and reuse the "When I check..." or
-  #   "When I uncheck..." steps in lines 89-95 of web_steps.rb
+  rating_list.split.each do |rating|
+    step "I #{uncheck ? 'un' : ''}check \"ratings_#{rating.gsub(/,/,'')}\"" 
+  end
+end
+
+Then /I should (not\s)?see movies with ratings: (.*)/ do |neg, rating_list|
+  movies = Movie.find_all_by_rating(rating_list)
+  movies.each do |movie|
+    step "I should #{neg ? 'not ' : ''}see #{movie.title}"
+  end
+end
+
+Then /I should see (all|none) (?:of )?the movies/ do |all|
+  movies = Movie.all
+  movie_table = []
+  movies.each do |movie|
+    movie_table << [movie.title, movie.rating, movie.release_date.to_s, "More info about #{movie.title}"]
+  end
+  if all
+    page.has_table?(:movies, :rows => movie_table)
+  else
+    assert page.has_no_table?(:movies, :rows => {})
+  end
+end
+
+Then /the checkboxes for all ratings should be checked/ do
+  ratings = Movie.all_ratings
+  ratings.each do |rating|
+    step "the \"ratings_#{rating}\" checkbox within \"form#ratings_form\" should be checked"
+  end
 end
