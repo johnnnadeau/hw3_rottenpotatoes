@@ -32,17 +32,13 @@ Then /I should (not\s)?see movies with ratings: (.*)/ do |neg, rating_list|
   end
 end
 
-Then /I should see (all|none) (?:of )?the movies/ do |all|
-  movies = Movie.all
+Then /I should see all (?:of )?the movies(?: ordered by (.*))/ do |ordering|
+  movies = Movie.all(:order => ordering)
   movie_table = []
   movies.each do |movie|
     movie_table << [movie.title, movie.rating, movie.release_date.to_s, "More info about #{movie.title}"]
   end
-  if all
-    page.has_table?(:movies, :rows => movie_table)
-  else
-    assert page.has_no_table?(:movies, :rows => {})
-  end
+  page.has_table?(:movies, :rows => movie_table)
 end
 
 Then /the checkboxes for all ratings should be checked/ do
