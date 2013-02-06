@@ -32,7 +32,7 @@ Then /I should (not\s)?see movies with ratings: (.*)/ do |neg, rating_list|
   end
 end
 
-Then /I should see all (?:of )?the movies(?: ordered by (.*))/ do |ordering|
+Then /I should see all (?:of )?the movies(?: ordered by (.*))?/ do |ordering|
   movies = Movie.all(:order => ordering)
   movie_table = []
   movies.each do |movie|
